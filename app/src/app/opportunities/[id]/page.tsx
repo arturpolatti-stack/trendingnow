@@ -31,14 +31,14 @@ async function Sheet({ params }: { params: Promise<{ id: string }> }) {
   await connection();
   const ctx = getStoreContext();
   let opp;
-  try { opp = db.opportunities.get(ctx, id); } catch (e) {
+  try { opp = await db.opportunities.get(ctx, id); } catch (e) {
     if (e instanceof NotFoundError) notFound();
     throw e;
   }
-  const all = db.observations.list(ctx).filter((o) => o.opportunityId === id);
+  const all = (await db.observations.list(ctx)).filter((o) => o.opportunityId === id);
   const add = addObservation.bind(null, id);
-  let decision; try { decision = db.decisions.get(ctx, `d-${id}`); } catch { /* sem decisão */ }
-  let briefing; try { briefing = db.briefings.get(ctx, `b-${id}`); } catch { /* sem briefing */ }
+  let decision; try { decision = await db.decisions.get(ctx, `d-${id}`); } catch (e) { if (!(e instanceof NotFoundError)) throw e; }
+  let briefing; try { briefing = await db.briefings.get(ctx, `b-${id}`); } catch (e) { if (!(e instanceof NotFoundError)) throw e; }
   return (
     <>
       <h1>{opp.product}</h1>

@@ -11,15 +11,16 @@ const DECISION_LABEL = { choose: "Chosen", postpone: "Postponed", reject: "Rejec
 async function Opportunities() {
   await connection();
   const ctx = getStoreContext();
-  const list = db.opportunities.list(ctx);
-  const decisions = new Map(db.decisions.list(ctx).map((d) => [d.opportunityId, d]));
+  const list = await db.opportunities.list(ctx);
+  const allObs = await db.observations.list(ctx);
+  const decisions = new Map((await db.decisions.list(ctx)).map((d) => [d.opportunityId, d]));
   if (list.length === 0) return <p className="muted">No opportunities yet.</p>;
   return (
     <table>
       <thead><tr><th>Opportunity</th><th>Evidence</th><th>Decision</th></tr></thead>
       <tbody>
         {list.map((o) => {
-          const n = db.observations.list(ctx).filter((x) => x.opportunityId === o.id).length;
+          const n = allObs.filter((x) => x.opportunityId === o.id).length;
           const d = decisions.get(o.id);
           return (
             <tr key={o.id}>

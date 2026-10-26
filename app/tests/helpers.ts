@@ -9,7 +9,7 @@ export const obs = (storeId: string, id = "e1", over: Partial<Observation> = {})
   id, storeId, opportunityId: "o1", dimension: "demand", source: "etsy-insights",
   sourceUrl: "https://example.test/src", term: "bachelorette bundle", metric: "searches",
   unit: "count", value: { kind: "number", value: 120 }, country: "US", language: "en",
-  periodStart: "2026-09-26", periodEnd: "2026-10-25", collectedAt: "2026-10-26T10:00:00Z",
+  periodStart: "2026-09-26", periodEnd: "2026-10-25", collectedAt: "2026-10-26T10:00:00.000Z",
   method: "manual", ...over,
 });
 

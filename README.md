@@ -29,7 +29,7 @@ Executar a preparação descrita em [Experimento](docs/EXPERIMENT.md): registrar
 
 ## Aplicativo
 
-Next.js (TypeScript) em `app/`; `npm test` roda os testes de domínio (INV-01, 02, 03, 04). Armazenamento em memória; sem banco, autenticação, IA nem fontes reais ainda.
+Next.js (TypeScript) em `app/`; `npm test` roda os testes de domínio (INV-01, 02, 03, 04). Postgres (Neon) com Drizzle; autenticação ainda provisória (`DEV_STORE_ID`), sem IA nem fontes reais. Requer `DATABASE_URL` em `app/.env.local` (`vercel env pull`). `npm run db:migrate` aplica as migrações.
 
 ```bash
 cd app && npm install && npm test

@@ -10,46 +10,55 @@ export interface StoreContext {
 
 export class NotFoundError extends Error {}
 
-interface Owned {
+export interface Owned {
   id: string;
   storeId: StoreId;
 }
 
 /**
- * Repositório em memória isolado por loja. Registros de outra loja são
+ * Contrato de repositório isolado por loja. Registros de outra loja são
  * indistinguíveis de registros inexistentes (sem vazar existência).
+ * As implementações (memória e Postgres) passam pela mesma suíte de contrato.
  */
-export class ScopedRepository<T extends Owned> {
+export interface Repository<T extends Owned> {
+  create(ctx: StoreContext, item: T): Promise<T>;
+  get(ctx: StoreContext, id: string): Promise<T>;
+  list(ctx: StoreContext): Promise<T[]>;
+  update(ctx: StoreContext, id: string, patch: Partial<Omit<T, "id" | "storeId">>): Promise<T>;
+  delete(ctx: StoreContext, id: string): Promise<void>;
+}
+
+export const NOT_FOUND = "Registro não encontrado";
+
+export class InMemoryRepository<T extends Owned> implements Repository<T> {
   private items = new Map<string, T>();
 
-  create(ctx: StoreContext, item: T): T {
-    if (item.storeId !== ctx.storeId) throw new NotFoundError("Registro não encontrado");
-    if (this.items.has(item.id)) throw new NotFoundError("Identificador já em uso");
+  async create(ctx: StoreContext, item: T): Promise<T> {
+    if (item.storeId !== ctx.storeId) throw new NotFoundError(NOT_FOUND);
+    if (this.items.has(item.id)) throw new NotFoundError(NOT_FOUND);
     this.items.set(item.id, structuredClone(item));
     return structuredClone(item);
   }
 
-  get(ctx: StoreContext, id: string): T {
+  async get(ctx: StoreContext, id: string): Promise<T> {
     const item = this.items.get(id);
-    if (!item || item.storeId !== ctx.storeId) throw new NotFoundError("Registro não encontrado");
+    if (!item || item.storeId !== ctx.storeId) throw new NotFoundError(NOT_FOUND);
     return structuredClone(item);
   }
 
-  list(ctx: StoreContext): T[] {
-    return [...this.items.values()]
-      .filter((i) => i.storeId === ctx.storeId)
-      .map((i) => structuredClone(i));
+  async list(ctx: StoreContext): Promise<T[]> {
+    return [...this.items.values()].filter((i) => i.storeId === ctx.storeId).map((i) => structuredClone(i));
   }
 
-  update(ctx: StoreContext, id: string, patch: Partial<Omit<T, "id" | "storeId">>): T {
-    const current = this.get(ctx, id);
+  async update(ctx: StoreContext, id: string, patch: Partial<Omit<T, "id" | "storeId">>): Promise<T> {
+    const current = await this.get(ctx, id);
     const next = { ...current, ...patch, id: current.id, storeId: current.storeId } as T;
     this.items.set(id, structuredClone(next));
     return structuredClone(next);
   }
 
-  delete(ctx: StoreContext, id: string): void {
-    this.get(ctx, id);
+  async delete(ctx: StoreContext, id: string): Promise<void> {
+    await this.get(ctx, id);
     this.items.delete(id);
   }
 }

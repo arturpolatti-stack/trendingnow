@@ -36,9 +36,9 @@ async function Editor({ params }: { params: Promise<{ id: string }> }) {
   await connection();
   const ctx = getStoreContext();
   let opp;
-  try { opp = db.opportunities.get(ctx, id); } catch (e) { if (e instanceof NotFoundError) notFound(); throw e; }
-  let b: Briefing | undefined; try { b = db.briefings.get(ctx, `b-${id}`); } catch { /* novo */ }
-  const options = db.observations.list(ctx).filter((o) => o.opportunityId === id)
+  try { opp = await db.opportunities.get(ctx, id); } catch (e) { if (e instanceof NotFoundError) notFound(); throw e; }
+  let b: Briefing | undefined; try { b = await db.briefings.get(ctx, `b-${id}`); } catch (e) { if (!(e instanceof NotFoundError)) throw e; }
+  const options = (await db.observations.list(ctx)).filter((o) => o.opportunityId === id)
     .map((o) => ({ id: o.id, label: `${o.term} — ${o.metric}: ${o.value.kind === "absent" ? o.value.state : o.value.value} (${o.source})` }));
   return (
     <>
