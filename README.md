@@ -2,7 +2,7 @@
 
 TrendingNow é o nome de trabalho de um SaaS para ajudar vendedores da Etsy a escolher quais produtos digitais criar para o mercado americano, usando evidências verificáveis e briefings executáveis no Canva.
 
-O projeto está em planejamento. A primeira entrega é validar um ciclo de decisão com dados reais e uma categoria de produto. As integrações e a implementação vêm conforme os critérios abaixo forem atendidos.
+Em 26/10/2026 o usuário pediu iniciar o MVP (DEC-08); a fundação está em [app/](app/). A preparação do experimento continua em paralelo. A primeira entrega é validar um ciclo de decisão com dados reais e uma categoria de produto. As integrações e a implementação vêm conforme os critérios abaixo forem atendidos.
 
 ## Leitura do plano
 
@@ -26,5 +26,13 @@ O primeiro experimento proposto compara oportunidades de uma única categoria. A
 ## Próxima atividade
 
 Executar a preparação descrita em [Experimento](docs/EXPERIMENT.md): registrar a capacidade de criação da lojista, medir seu processo atual e verificar as evidências disponíveis para a categoria proposta. Não existem resultados de mercado ou uma tendência recomendada nesta versão do plano.
+
+## Aplicativo
+
+Next.js (TypeScript) em `app/`; `npm test` roda os testes de domínio (INV-01, 02, 03, 04). Armazenamento em memória; sem banco, autenticação, IA nem fontes reais ainda.
+
+```bash
+cd app && npm install && npm test
+```
 
 Durante o trabalho, pedir `direction` ao agente aciona o procedimento documentado. Esse é um protocolo de trabalho; não há uma CLI ou aplicação instalada.

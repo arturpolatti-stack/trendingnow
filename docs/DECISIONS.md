@@ -14,6 +14,13 @@ Registro inicial de 26 de outubro de 2026. Decisões confirmadas refletem instru
 | DEC-06 | Reservar inicialmente US$10–20 mensais para consumo de IA. | O volume viável será medido; essa reserva não inclui automaticamente fontes de dados e infraestrutura. |
 | DEC-07 | Adotar planejamento documentado, crítica sem histórico e verificação de direção. | Requisitos críticos terão critérios verificáveis; revisões e mudanças de rumo serão registradas. |
 
+## Mudanças registradas
+
+| ID | Data | Decisão anterior | Nova decisão | Motivo e impacto |
+| --- | --- | --- | --- | --- |
+| DEC-08 | 26/10/2026 | PRD exigia experimento executado antes de implementar o MVP (DEC-01). | O usuário pediu iniciar o MVP agora, em paralelo à preparação do experimento. | Instrução do usuário prevalece (AGENTS.md). Escopo inicial: fundação testável (modelos de evidência, isolamento por loja, controle de consumo de IA) com armazenamento em memória atrás de interfaces; sem fontes de dados reais, sem banco, autenticação ou provedor de IA escolhidos. Os critérios de avanço do PRD para protótipo/MVP piloto continuam valendo; o experimento segue necessário para validar utilidade. |
+| DEC-09 | 26/10/2026 | Visibilidade do repositório não definida. | Repositório GitHub `arturpolatti-stack/trendingnow`, hoje privado. Usuário disse que o projeto "vai ficar aberto por enquanto"; interpretação (público ou apenas em andamento) a confirmar antes de mudar a visibilidade. | Documentos contêm estratégia de negócio; não tornar público sem confirmação. |
+
 ## Propostas para validação
 
 | ID | Proposta | Como decidir |
