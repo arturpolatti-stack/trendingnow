@@ -1,13 +1,16 @@
 import "server-only";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import type { StoreContext } from "@/domain/scoped-repository";
+import { auth } from "./auth";
 
 /**
- * PLACEHOLDER: autenticação ainda não foi escolhida (DECISIONS.md).
- * Em desenvolvimento a loja vem de DEV_STORE_ID; em produção a função
- * falha de propósito, para que nada seja servido sem identidade real.
- * O contexto nunca vem de parâmetros da requisição (INV-01).
+ * O contexto da loja vem sempre da sessão validada no servidor, nunca de
+ * parâmetros da requisição (INV-01). No MVP cada usuário é dono de uma loja:
+ * storeId = user.id. Sem sessão válida, redireciona para o login.
  */
-export function getStoreContext(): StoreContext {
-  if (process.env.NODE_ENV === "production") throw new Error("Autenticação não configurada");
-  return { storeId: process.env.DEV_STORE_ID || "dev-store" };
+export async function getStoreContext(): Promise<StoreContext> {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) redirect("/login");
+  return { storeId: session.user.id };
 }

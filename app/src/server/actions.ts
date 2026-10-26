@@ -34,7 +34,7 @@ async function guard(run: () => Promise<void>): Promise<FormState> {
 }
 
 export async function saveProfile(_: FormState, formData: FormData): Promise<FormState> {
-  const ctx = getStoreContext();
+  const ctx = await getStoreContext();
   const res = await guard(async () => {
     await upsert(db.profiles, ctx, parseProfileForm(formData, ctx.storeId));
   });
@@ -43,7 +43,7 @@ export async function saveProfile(_: FormState, formData: FormData): Promise<For
 }
 
 export async function createOpportunity(_: FormState, formData: FormData): Promise<FormState> {
-  const ctx = getStoreContext();
+  const ctx = await getStoreContext();
   const id = randomUUID();
   const res = await guard(async () => { await db.opportunities.create(ctx, parseOpportunityForm(formData, ctx.storeId, id)); });
   if (res.error) return res;
@@ -52,7 +52,7 @@ export async function createOpportunity(_: FormState, formData: FormData): Promi
 }
 
 export async function addObservation(opportunityId: string, _: FormState, formData: FormData): Promise<FormState> {
-  const ctx = getStoreContext();
+  const ctx = await getStoreContext();
   const res = await guard(async () => {
     await db.opportunities.get(ctx, opportunityId); // falha se a oportunidade não for desta loja
     await db.observations.create(ctx, parseObservationForm(formData, ctx.storeId, opportunityId, randomUUID()));
@@ -62,7 +62,7 @@ export async function addObservation(opportunityId: string, _: FormState, formDa
 }
 
 export async function saveDecision(opportunityId: string, _: FormState, formData: FormData): Promise<FormState> {
-  const ctx = getStoreContext();
+  const ctx = await getStoreContext();
   const res = await guard(async () => {
     await db.opportunities.get(ctx, opportunityId);
     await upsert(db.decisions, ctx, parseDecisionForm(formData, ctx.storeId, opportunityId));
@@ -73,7 +73,7 @@ export async function saveDecision(opportunityId: string, _: FormState, formData
 
 /** Avança a etapa informada pela lojista (criação → publicação → avaliação). */
 export async function advanceStage(opportunityId: string, formData: FormData) {
-  const ctx = getStoreContext();
+  const ctx = await getStoreContext();
   const d = await db.decisions.get(ctx, `d-${opportunityId}`);
   const next = formData.get("stage");
   if (d.kind !== "choose" || !STAGES.includes(next as never)) throw new ValidationError("Etapa inválida");
@@ -83,7 +83,7 @@ export async function advanceStage(opportunityId: string, formData: FormData) {
 }
 
 export async function saveBriefing(opportunityId: string, _: FormState, formData: FormData): Promise<FormState> {
-  const ctx = getStoreContext();
+  const ctx = await getStoreContext();
   const res = await guard(async () => {
     await db.opportunities.get(ctx, opportunityId);
     const b = parseBriefingForm(formData, ctx.storeId, opportunityId);

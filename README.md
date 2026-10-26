@@ -29,7 +29,7 @@ Executar a preparação descrita em [Experimento](docs/EXPERIMENT.md): registrar
 
 ## Aplicativo
 
-Next.js (TypeScript) em `app/`; `npm test` roda os testes de domínio (INV-01, 02, 03, 04). Postgres (Neon) com Drizzle; autenticação ainda provisória (`DEV_STORE_ID`), sem IA nem fontes reais. Requer `DATABASE_URL` em `app/.env.local` (`vercel env pull`). `npm run db:migrate` aplica as migrações.
+Next.js (TypeScript) em `app/`; `npm test` roda os testes de domínio (INV-01, 02, 03, 04). Postgres (Neon) com Drizzle; login por e-mail e senha com Better Auth (uma loja por usuário), sem IA nem fontes reais. Requer `DATABASE_URL` em `app/.env.local` (`vercel env pull`) e `BETTER_AUTH_SECRET`/`BETTER_AUTH_URL` em `app/.env.development.local`. `npm run db:migrate` aplica as migrações.
 
 ```bash
 cd app && npm install && npm test

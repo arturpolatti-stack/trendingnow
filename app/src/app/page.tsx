@@ -10,7 +10,7 @@ const DECISION_LABEL = { choose: "Chosen", postpone: "Postponed", reject: "Rejec
 
 async function Opportunities() {
   await connection();
-  const ctx = getStoreContext();
+  const ctx = await getStoreContext();
   const list = await db.opportunities.list(ctx);
   const allObs = await db.observations.list(ctx);
   const decisions = new Map((await db.decisions.list(ctx)).map((d) => [d.opportunityId, d]));

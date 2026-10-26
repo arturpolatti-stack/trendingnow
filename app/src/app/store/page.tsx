@@ -9,7 +9,7 @@ import { ActionForm } from "../action-form";
 
 async function Profile() {
   await connection();
-  const ctx = getStoreContext();
+  const ctx = await getStoreContext();
   let p: StoreProfile | undefined;
   try { p = await db.profiles.get(ctx, ctx.storeId); } catch (e) { if (!(e instanceof NotFoundError)) throw e; }
   return (

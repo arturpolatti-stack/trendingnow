@@ -34,7 +34,7 @@ function EvidencePicker({ name, options, selected }: { name: string; options: { 
 async function Editor({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   await connection();
-  const ctx = getStoreContext();
+  const ctx = await getStoreContext();
   let opp;
   try { opp = await db.opportunities.get(ctx, id); } catch (e) { if (e instanceof NotFoundError) notFound(); throw e; }
   let b: Briefing | undefined; try { b = await db.briefings.get(ctx, `b-${id}`); } catch (e) { if (!(e instanceof NotFoundError)) throw e; }

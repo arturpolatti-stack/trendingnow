@@ -29,7 +29,7 @@ function show(o: Observation): string {
 async function Sheet({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   await connection();
-  const ctx = getStoreContext();
+  const ctx = await getStoreContext();
   let opp;
   try { opp = await db.opportunities.get(ctx, id); } catch (e) {
     if (e instanceof NotFoundError) notFound();
