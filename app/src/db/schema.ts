@@ -1,4 +1,4 @@
-import { boolean, doublePrecision, index, jsonb, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { bigint, boolean, doublePrecision, index, jsonb, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
 /**
  * Toda tabela tem store_id e toda consulta o filtra no servidor (INV-01).
@@ -114,3 +114,18 @@ export const verification = pgTable("verification", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [index("verification_identifier_idx").on(t.identifier)]);
+
+/** Livro-razão de consumo de IA (INV-04): uma linha por reserva; status open → settled | released. */
+export const aiReservations = pgTable("ai_reservations", {
+  id: text("id").primaryKey(),
+  storeId: text("store_id").notNull(),
+  requestKey: text("request_key").notNull(),
+  reservedMicros: bigint("reserved_micros", { mode: "number" }).notNull(),
+  actualMicros: bigint("actual_micros", { mode: "number" }),
+  status: text("status").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  settledAt: timestamp("settled_at", { withTimezone: true }),
+}, (t) => [
+  index("ai_reservations_store_created_idx").on(t.storeId, t.createdAt),
+  index("ai_reservations_request_idx").on(t.requestKey),
+]);
