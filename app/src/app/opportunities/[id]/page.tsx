@@ -6,7 +6,9 @@ import { NotFoundError } from "@/domain/scoped-repository";
 import type { Dimension, Observation } from "@/domain/types";
 import { db } from "@/server/db";
 import { getStoreContext } from "@/server/session";
-import { addObservation } from "@/server/actions";
+import { addObservation, advanceStage, saveDecision } from "@/server/actions";
+import { STAGES } from "@/domain/types";
+import { ActionForm } from "@/app/action-form";
 
 const DIMENSIONS: { key: Dimension; title: string; note: string }[] = [
   { key: "attention", title: "Attention", note: "Social/search interest. Does not prove purchase intent on Etsy." },
@@ -35,6 +37,8 @@ async function Sheet({ params }: { params: Promise<{ id: string }> }) {
   }
   const all = db.observations.list(ctx).filter((o) => o.opportunityId === id);
   const add = addObservation.bind(null, id);
+  let decision; try { decision = db.decisions.get(ctx, `d-${id}`); } catch { /* sem decisão */ }
+  let briefing; try { briefing = db.briefings.get(ctx, `b-${id}`); } catch { /* sem briefing */ }
   return (
     <>
       <h1>{opp.product}</h1>
@@ -63,8 +67,41 @@ async function Sheet({ params }: { params: Promise<{ id: string }> }) {
           </section>
         );
       })}
+      <h2>Decision</h2>
+      {decision ? (
+        <p>
+          <span className="badge">{decision.kind === "choose" ? "Chosen" : decision.kind === "postpone" ? "Postponed" : "Rejected"}</span>{" "}
+          {decision.reason}
+          {decision.missingEvidence && <><br /><span className="muted">Missing evidence: {decision.missingEvidence}</span></>}
+        </p>
+      ) : <p className="muted">Undecided. You can also decide that the evidence is not enough.</p>}
+      <ActionForm action={saveDecision.bind(null, id)} submit={decision ? "Update decision" : "Save decision"}>
+        <label>Decision
+          <select name="kind" defaultValue={decision?.kind ?? "choose"}>
+            <option value="choose">Create this product</option>
+            <option value="postpone">Wait for more evidence</option>
+            <option value="reject">Reject</option>
+          </select>
+        </label>
+        <label>Reason <textarea name="reason" rows={2} required defaultValue={decision?.reason} /></label>
+        <label>If waiting: which evidence is missing? <input name="missingEvidence" defaultValue={decision?.missingEvidence} /></label>
+      </ActionForm>
+      {decision?.kind === "choose" && (
+        <section>
+          <h3>Progress <span className="muted">(reported by you; the app does not attribute sales)</span></h3>
+          <p>{STAGES.map((s) => <span key={s} className="badge" style={{ marginRight: 6, opacity: STAGES.indexOf(s) <= STAGES.indexOf(decision.stage!) ? 1 : 0.4 }}>{s}</span>)}</p>
+          {decision.stage !== "evaluated" && (
+            <form action={advanceStage.bind(null, id)}>
+              <input type="hidden" name="stage" value={STAGES[STAGES.indexOf(decision.stage!) + 1]} />
+              <button type="submit">Mark as {STAGES[STAGES.indexOf(decision.stage!) + 1]}</button>
+            </form>
+          )}
+        </section>
+      )}
+      <h2>Briefing</h2>
+      <p><Link href={`/opportunities/${id}/briefing`}>{briefing ? "Open briefing" : "Write briefing"}</Link></p>
       <h2>Add observation</h2>
-      <form action={add} style={{ display: "grid", gap: ".5rem", maxWidth: 520 }}>
+      <ActionForm action={add} submit="Save observation" resetOnSuccess>
         <label>Dimension
           <select name="dimension">{DIMENSIONS.map((d) => <option key={d.key} value={d.key}>{d.title}</option>)}</select>
         </label>
@@ -87,15 +124,14 @@ async function Sheet({ params }: { params: Promise<{ id: string }> }) {
         <label>Normalization (required for relative data) <input name="normalization" /></label>
         <label>Country <input name="country" defaultValue="US" /></label>
         <label>Language <input name="language" defaultValue="en" /></label>
-        <button type="submit">Save observation</button>
-      </form>
+      </ActionForm>
     </>
   );
 }
 
 export default function Page({ params }: { params: Promise<{ id: string }> }) {
   return (
-    <main style={{ maxWidth: 960, margin: "3rem auto", padding: "0 1rem" }}>
+    <main>
       <p><Link href="/">← Opportunities</Link></p>
       <Suspense fallback={<p>Loading…</p>}><Sheet params={params} /></Suspense>
     </main>

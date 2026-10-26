@@ -47,3 +47,19 @@ a {
     color-scheme: dark;
   }
 }
+
+/* Esqueleto: estilos mínimos e neutros */
+body { align-items: stretch; }
+.shell { max-width: 960px; width: 100%; margin: 0 auto; padding: 0 1rem 4rem; }
+.nav { display: flex; gap: 1rem; align-items: center; padding: 1rem 0; border-bottom: 1px solid #8884; margin-bottom: 1.5rem; }
+.nav .brand { font-weight: 700; margin-right: auto; }
+.form { display: grid; gap: .6rem; max-width: 560px; }
+.form label { display: grid; gap: .2rem; font-size: .9rem; }
+.form input, .form select, .form textarea { font: inherit; padding: .4rem; }
+.error { color: #b00020; }
+.ok { color: #1b7a3a; }
+.muted { opacity: .7; font-size: .85rem; }
+table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+th, td { text-align: left; padding: .35rem .5rem; border-bottom: 1px solid #8883; vertical-align: top; }
+fieldset { border: 1px solid #8884; padding: .5rem .75rem; }
+.badge { display: inline-block; padding: .1rem .5rem; border: 1px solid #8886; border-radius: 1rem; font-size: .8rem; }

@@ -1,5 +1,9 @@
 import { ValidationError, validateObservation } from "./evidence";
-import type { AbsenceState, Dimension, Observation, ObservationValue, Opportunity } from "./types";
+import {
+  BRIEFING_FIELDS,
+  type AbsenceState, type Briefing, type Decision, type DecisionKind, type Dimension,
+  type Observation, type ObservationValue, type Opportunity, type StoreProfile,
+} from "./types";
 
 type Fields = { get(name: string): FormDataEntryValue | null };
 
@@ -55,4 +59,45 @@ export function parseObservationForm(f: Fields, storeId: string, opportunityId: 
   };
   validateObservation(obs);
   return obs;
+}
+
+export function parseProfileForm(f: Fields, storeId: string): StoreProfile {
+  const hours = text(f, "maxEffortHours");
+  if (hours !== "" && (!Number.isFinite(Number(hours)) || Number(hours) <= 0)) {
+    throw new ValidationError("Esforço máximo deve ser um número positivo");
+  }
+  const p: StoreProfile = {
+    id: storeId, storeId, name: text(f, "name"), market: text(f, "market") || "US",
+    categories: text(f, "categories"), capacity: text(f, "capacity"),
+    maxEffortHours: hours === "" ? null : Number(hours),
+  };
+  if (!p.name) throw new ValidationError("Informe o nome da loja");
+  return p;
+}
+
+export function parseDecisionForm(f: Fields, storeId: string, opportunityId: string): Decision {
+  const kind = text(f, "kind") as DecisionKind;
+  if (!["choose", "postpone", "reject"].includes(kind)) throw new ValidationError("Decisão inválida");
+  const reason = text(f, "reason");
+  if (!reason) throw new ValidationError("Registre o motivo da decisão");
+  const missingEvidence = text(f, "missingEvidence");
+  if (kind === "postpone" && !missingEvidence) throw new ValidationError("Adiar exige dizer qual evidência falta");
+  return {
+    id: `d-${opportunityId}`, storeId, opportunityId, kind, reason,
+    stage: kind === "choose" ? "chosen" : undefined,
+    missingEvidence: kind === "postpone" ? missingEvidence : undefined,
+    decidedAt: new Date().toISOString(),
+  };
+}
+
+type ListFields = Fields & { getAll(name: string): FormDataEntryValue[] };
+const ids = (f: ListFields, name: string) => f.getAll(name).filter((v): v is string => typeof v === "string");
+
+export function parseBriefingForm(f: ListFields, storeId: string, opportunityId: string): Briefing {
+  const fields = Object.fromEntries(BRIEFING_FIELDS.map((k) => [k, text(f, k)])) as Briefing["fields"];
+  return {
+    id: `b-${opportunityId}`, storeId, opportunityId, fields,
+    reasons: [1, 2].map((n) => ({ text: text(f, `reason${n}`), evidenceIds: ids(f, `reason${n}Ev`) })),
+    uncertainty: { text: text(f, "uncertainty"), evidenceIds: ids(f, "uncertaintyEv") },
+  };
 }

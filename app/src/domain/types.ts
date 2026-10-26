@@ -75,3 +75,31 @@ export interface Briefing {
   reasons: { text: string; evidenceIds: string[] }[];
   uncertainty: { text: string; evidenceIds: string[] };
 }
+
+export interface StoreProfile {
+  id: string; // igual ao storeId: um perfil por loja
+  storeId: StoreId;
+  name: string;
+  market: string;
+  categories: string;
+  capacity: string; // o que a lojista consegue criar, ferramentas e formatos
+  maxEffortHours: number | null;
+}
+
+/** R-06: sugestão, escolha, criação, publicação e avaliação são etapas distintas. */
+export const STAGES = ["chosen", "created", "published", "evaluated"] as const;
+export type Stage = (typeof STAGES)[number];
+export type DecisionKind = "choose" | "postpone" | "reject";
+
+export interface Decision {
+  id: string;
+  storeId: StoreId;
+  opportunityId: string;
+  kind: DecisionKind;
+  reason: string;
+  /** Só existe para kind = "choose". Informado pela lojista; não atribui vendas ao app. */
+  stage?: Stage;
+  /** Para "postpone": qual evidência falta. */
+  missingEvidence?: string;
+  decidedAt: string;
+}
